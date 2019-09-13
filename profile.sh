@@ -49,23 +49,42 @@ setup_xterm () {
 #############
 
 # Make sure we have an SSH agent available
-test_agent_socket () {
+ssh_test_agent() {
   SSH_AUTH_SOCK=$1 ssh-add -l 2>/dev/null >/dev/null
   local result=$?
-  return [[ $result -eq 0 -p $result -eq $1 ]]
+  test "$result" == "0" -o "$result" == "1"
+  return $?
 }
 
-#ensure_ssh_agent() {
-#  if [ ! test_agent_socket "$SSH_AUTH_SOCK" ]; then
-#    local SOCKET=$HOME/.ssh/agent-socket
-#    mkdir -p $HOME/.ssh
-#    if [ ! test_agent_socket "$SOCKET" ]; then
-#      eval $(ssh-agent -a "$SOCKET") >/dev/null
-#    fi
-#  fi
-#  ssh-add -l >/dev/null
-#}
-#ensure_ssh_agent
+ensure_ssh_agent() {
+  ssh_test_agent "$SSH_AUTH_SOCK"
+  if [ $? -eq 1 ]; then
+    local SOCKET="$HOME/.ssh/agent-socket"
+    mkdir -p $HOME/.ssh
+    ssh_test_agent "$SOCKET"
+    if [ ! $? ]; then
+      eval $(ssh-agent -a "$SOCKET")
+    else
+      export SSH_AUTH_SOCK="$SOCKET"
+    fi
+  fi
+}
+
+ssh_add_keys() {
+  local key_paths=$(ssh-add -l | awk '{print $3}')
+  while [ "$1" != "" ]; do
+    local should_add=true
+    for kp in $key_paths; do
+      if [ "$1" == "$kp" ]; then 
+        should_add=false
+      fi
+    done
+    if $should_add; then
+      ssh-add "$1"
+    fi
+    shift
+  done
+}
 
 ##########
 # Colors #

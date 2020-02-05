@@ -34,6 +34,7 @@ set cmdheight=2     " Change the height of the command bar
 set backspace=indent,eol,start  " Make backspace work intelligently
 set autoread        " auto-read when a file is changed externally
 set number          " Show line numbers
+set ruler           " Show the row and column in the statusbar
 set tabstop=4		" We use 4 spaces here
 set shiftwidth=4	" We use 4 spaces here
 set expandtab		" Use spaces instead of tabs
@@ -83,6 +84,10 @@ vnoremap <S-Tab> <<<ESC>
 " Map Ctrl+a to select all
 map <C-a> <ESC>ggVG<CR>
 
+if expand("$MACHTYPE") !=? ""
+  vnoremap <leader>c :'<,'>w !pbcopy<CR>
+endif
+
 " Shortcut for clearing the current highlight
 map <leader>l :nohl<CR>
 
@@ -115,9 +120,9 @@ noremap <unique> <leader>8 8gt
 noremap <unique> <leader>9 9gt
 noremap <unique> <leader>0 10gt
 
-" Map ,w and ,e take you to the previous and next tabs, respectively
-map <leader>w :tabp<CR>
-map <leader>e :tabn<CR>
+" Map ,< and ,> to take you to the previous and next tabs, repesctively
+map <leader><LT> :tabp<CR>
+map <leader>> :tabn<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""
 " => Load directory .vimrc. ONLY DO THIS IF YOU TRUST THE LOCAL VIMRC

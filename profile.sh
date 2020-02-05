@@ -12,27 +12,6 @@
 # Shell and Terminal Options #
 ##############################
 
-setup_shell () {
-    # don't put duplicate lines or lines starting with space in the history.
-    # See bash(1) for more options
-    HISTCONTROL=ignoreboth
-
-    # append to the history file, don't overwrite it
-    shopt -s histappend
-
-    # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-    HISTSIZE=1000
-    HISTFILESIZE=2000
-
-    # check the window size after each command and, if necessary,
-    # update the values of LINES and COLUMNS.
-    shopt -s checkwinsize
-
-    # If set, the pattern "**" used in a pathname expansion context will
-    # match all files and zero or more directories and subdirectories.
-    shopt -s globstar
-}
-
 setup_xterm () {
     # If this is an xterm set the title to user@host:dir
     case "$TERM" in
@@ -43,6 +22,8 @@ setup_xterm () {
         ;;
     esac
 }
+
+
 
 #############
 # SSH Agent #
@@ -75,7 +56,7 @@ ssh_add_keys() {
   while [ "$1" != "" ]; do
     local should_add=true
     for kp in $key_paths; do
-      if [ "$1" == "$kp" ]; then 
+      if [ "$1" = "$kp" ]; then 
         should_add=false
       fi
     done
@@ -130,8 +111,8 @@ setup_aliases () {
         export VISUAL=vim
         export EDITOR=vim
     fi
-    alias ll='ls -alF'
-    alias la='ls -A'
+    alias ll='ls -l'
+    alias la='ls -Al'
     alias l='ls -CF'
 }
 

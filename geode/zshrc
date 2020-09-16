@@ -1,0 +1,19 @@
+# Script path in zsh: "${(%):-%x}"
+source $DOTFILES/profile.sh
+source $DOTFILES/zshrc
+
+setup_aliases
+
+ssh_add_keys $HOME/.ssh/id_rsa.pub
+
+export BASH_SILENCE_DEPRECATION_WARNING=1
+export CLICOLOR=true
+alias py=python3
+alias ls='ls -G'
+alias java8='/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home/bin/java'
+
+export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="/usr/local/opt/node@10/bin:$PATH"
+export PATH="$PATH:$HOME/bin"
+export GOPATH="$HOME/go"
+

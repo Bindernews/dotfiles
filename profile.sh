@@ -52,11 +52,12 @@ ensure_ssh_agent() {
 }
 
 ssh_add_keys() {
-  local key_paths=$(ssh-add -l | awk '{print $3}')
+  local key_ids=$(ssh-add -l | awk '{print $3}')
   while [ "$1" != "" ]; do
+    local test_id=$(cat "$1" | awk '{print $3}')
     local should_add=true
-    for kp in $key_paths; do
-      if [ "$1" = "$kp" ]; then 
+    for kp in $key_ids; do
+      if [ "$1" = "$kp" ] || [ "$test_id" = "$kp" ]; then 
         should_add=false
       fi
     done

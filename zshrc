@@ -1,7 +1,7 @@
 
 setopt autocd
 autoload -Uz compinit
-compinit
+compinit -u
 setopt hist_ignore_all_dups
 setopt hist_ignore_space
 

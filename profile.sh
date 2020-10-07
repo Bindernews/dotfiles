@@ -6,7 +6,9 @@
 # setup_shell
 # if has_color; then setup_colors; fi
 # setup_aliases
-# 
+#
+
+export SHELL_BASENAME=$(basename "$SHELL")
 
 ##############################
 # Shell and Terminal Options #
@@ -54,7 +56,8 @@ ensure_ssh_agent() {
 ssh_add_keys() {
   local key_ids=$(ssh-add -l | awk '{print $3}')
   while [ "$1" != "" ]; do
-    local test_id=$(cat "$1" | awk '{print $3}')
+    # We're adding the private key, but we test the public key identity
+    local test_id=$(cat "$1.pub" | awk '{print $3}')
     local should_add=true
     for kp in $key_ids; do
       if [ "$1" = "$kp" ] || [ "$test_id" = "$kp" ]; then 
@@ -116,6 +119,7 @@ setup_aliases () {
     alias la='ls -Al'
     alias l='ls -CF'
 }
+
 
 # Activate the Python venv in directory $1
 workon () {

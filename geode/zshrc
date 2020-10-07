@@ -4,7 +4,7 @@ source $DOTFILES/zshrc
 
 setup_aliases
 
-ssh_add_keys $HOME/.ssh/id_rsa.pub
+ssh_add_keys $HOME/.ssh/id_rsa
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
 export CLICOLOR=true

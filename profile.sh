@@ -41,11 +41,11 @@ ssh_test_agent() {
 
 ensure_ssh_agent() {
   ssh_test_agent "$SSH_AUTH_SOCK"
-  if [ $? -eq 1 ]; then
+  if [ $? -ne 0 ]; then
     local SOCKET="$HOME/.ssh/agent-socket"
     mkdir -p $HOME/.ssh
     ssh_test_agent "$SOCKET"
-    if [ ! $? ]; then
+    if [ $? -ne 0 ]; then
       eval $(ssh-agent -a "$SOCKET")
     else
       export SSH_AUTH_SOCK="$SOCKET"

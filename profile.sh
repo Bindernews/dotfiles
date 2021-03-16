@@ -35,7 +35,8 @@ setup_xterm () {
 ssh_test_agent() {
   SSH_AUTH_SOCK=$1 ssh-add -l 2>/dev/null >/dev/null
   local result=$?
-  test "$result" == "0" -o "$result" == "1"
+  #test "$result" == "0" -o "$result" == "1"
+  test "$result" == "0"
   return $?
 }
 
@@ -46,6 +47,9 @@ ensure_ssh_agent() {
     mkdir -p $HOME/.ssh
     ssh_test_agent "$SOCKET"
     if [ $? -ne 0 ]; then
+      if [ -e "$SOCKET" ]; then
+        rm $SOCKET
+      fi
       eval $(ssh-agent -a "$SOCKET")
     else
       export SSH_AUTH_SOCK="$SOCKET"

@@ -47,6 +47,8 @@ set showmatch
 set lazyredraw
 " Set column limit
 set colorcolumn=100
+" Split right and down instead of left and up
+set splitright splitbelow
 
 " Disable relative line numbers for unfocused buffers
 " https://jeffkreeftmeijer.com/vim-number/
@@ -77,4 +79,4 @@ highlight NvimTreeFolderIcon guibg=blue
 " Use better color scheme
 colorscheme nordfox
 
-" vim: set ts=2 sw=2
+" vim: set ts=2 sw=2 :

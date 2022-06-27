@@ -1,19 +1,25 @@
 # Script path in zsh: "${(%):-%x}"
-source $DOTFILES/profile.sh
+source $DOTFILES/common.sh
 source $DOTFILES/zshrc
 
 setup_aliases
+setup_colors
 
 ssh_add_keys $HOME/.ssh/id_rsa
 
-export BASH_SILENCE_DEPRECATION_WARNING=1
-export CLICOLOR=true
+#export BASH_SILENCE_DEPRECATION_WARNING=1
 alias py=python3
-alias ls='ls -G'
-alias java8='/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home/bin/java'
 
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="/usr/local/opt/node@10/bin:$PATH"
-export PATH="$PATH:$HOME/bin"
+# Add homebrew sbin, ~/bin, and cargo bin dir to path
+export PATH="/usr/local/sbin:$HOME/bin:$HOME/.cargo/bin:$PATH"
 export GOPATH="$HOME/go"
+setup_dedup_path
+
+# lazy-load nvm command
+nvm () {
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    nvm $*
+}
 

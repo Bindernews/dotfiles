@@ -18,5 +18,12 @@ shopt -s checkwinsize
 # match all files and zero or more directories and subdirectories.
 shopt -s globstar
 
-export PS1="\u:\W \$ "
+# Disable posh prompt
+unposh () {
+    export PS1="\u:\W \$ "
+}
+
+# Load posh-git
+eval "$(oh-my-posh init bash --config "$DOTFILES/oh-my-posh.json")"
+
 

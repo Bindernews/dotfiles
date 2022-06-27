@@ -1,37 +1,37 @@
-#!/bin/bash
-
-# This file is setup as a series of functions. It defines a few functions when source'd, but doesn't
-# change anything else. To use it, source it and then run the following:
+# This file holds common code for various prompts, it should be "sourced`
+# not run in a separate shell.
+# It should run in bash, zsh, and maybe eventually nushell?
 # 
-# setup_shell
-# if has_color; then setup_colors; fi
-# setup_aliases
-#
+
+if [ -z "$DOTFILES" ]; then
+  echo "ERROR: DOTFILES must be defined" >&2
+  return 0
+fi
+
+# Could use this to auto-set DOTFILES location
+# if [ -n "$ZSH_VERSION" ]; then
+#     echo "${(%):-%x}"
+# elif [ -n "$BASH_VERSION" ]; then
+#     echo "$BASH_SOURCE"
+# else
+#     echo "ERROR: Cannot determine path to common.sh" >&2
+# fi
 
 export SHELL_BASENAME=$(basename "$SHELL")
 
-##############################
-# Shell and Terminal Options #
-##############################
-
-setup_xterm () {
-    # If this is an xterm set the title to user@host:dir
-    case "$TERM" in
-    xterm*|rxvt*)
-        PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-        ;;
-    *)
-        ;;
-    esac
+# Profiling helper function
+profileit () {
+    if [ -n "$PROFILE_STARTUP" ]; then
+        time ($*)
+    fi
+    eval "$*"
 }
-
-
 
 #############
 # SSH Agent #
 #############
 
-# Make sure we have an SSH agent available
+# Test to see if an SSH agent is available at the given socket
 ssh_test_agent() {
   SSH_AUTH_SOCK=$1 ssh-add -l 2>/dev/null >/dev/null
   local result=$?
@@ -39,6 +39,7 @@ ssh_test_agent() {
   return $?
 }
 
+# Make sure we have an SSH agent available
 ensure_ssh_agent() {
   ssh_test_agent "$SSH_AUTH_SOCK"
   if [ $? -eq 1 ]; then
@@ -75,28 +76,37 @@ ssh_add_keys() {
 # Colors #
 ##########
 
-# Echos "yes" if the terminal supports color, "" if it doesn't.
+# Exit true if terminal supports color, false if not.
+# Set CLICOLOR to automatically return true.
 has_color () {
+    if [ -n "$CLICOLOR" ]; then
+        return 0;
+    fi
     # If the terminal is xterm or has the name -256color then assume it has color
     case "$TERM" in
-        xterm-color|*-256color) echo "yes"; return 0;;
+        xterm-color|*-256color) return 0;;
     esac
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
         # We have color support; assume it's compliant with Ecma-48
         # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
         # a case would tend to support setf rather than setaf.)
-        echo "yes"; return 0;
+        return 0;
     fi
     return 1;
 }
 
+# Setup the terminal as 
 setup_colors () {
+    if [ ! has_color ]; then
+        return
+    fi
+
     # This exports LS_COLORS if dircolors exists, which changes what colors LS uses.
     if [ -x /usr/bin/dircolors ]; then
         test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     fi
 
-    export CLICOLOR=y
+    export CLICOLOR=true
     alias ls='ls --color=auto'
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
@@ -110,24 +120,36 @@ setup_colors () {
 # Aliases and Functions #
 #########################
 
+# Helper to reset IFS to default value
+reset_ifs () {
+  export IFS=$' \t\n'
+}
+
 setup_aliases () {
-    if [ -f "/usr/bin/vim" ]; then
-        export VISUAL=vim
-        export EDITOR=vim
-    fi
+    # Select editor, lowest-to-highest priority
+    for e in "nano" "vim" "nvim"; do
+        if which $e >/dev/null; then export EDITOR=$e; fi
+    done
+    export VISUAL=$EDITOR
+    # Add extra ls aliases
     alias ll='ls -l'
     alias la='ls -Al'
     alias l='ls -CF'
+    # Use nvim config in dotfiles
+    alias nvim='XDG_CONFIG_HOME=$DOTFILES nvim'
+    alias nvim-raw='/usr/local/bin/nvim'
 }
 
 
 # Activate the Python venv in directory $1
 workon () {
-  if [ -f "$1/bin/activate" ]; then
-    source "$1/bin/activate"
-  else
-    echo "Directory is not a Python venv"
-  fi
+  for path in "$1" "$HOME/.virtualenv/$1"; do
+    if [ -f "$path/bin/activate" ]; then
+      source "$path/bin/activate"
+      return $?
+    fi
+  done
+  echo "Directory is not a Python venv"
 }
 
 # Run vim and enable loading the .vimrc file in the cwd
@@ -140,20 +162,13 @@ lvim () {
   fi
 }
 
-# Utility function for adding directories to the path
-add_path () {
-    local opt_prefix=false
-    while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
-        -p | --prefix )
-            opt_prefix=true
-            ;;
-    esac; shift; done
-    if [ -d "$1" ]; then
-        if $opt_prefix; then
-            export PATH="$1:$PATH"
-        else
-            export PATH="$PATH:$1"
-        fi
-    fi
+# Removes all duplicate path entries, preserving the order
+setup_dedup_path () {
+  export PATH=$(awk '{
+    mx=split($0,a,":"); sep="";
+    for (i=1; i<=mx; i++) { if (!seen[a[i]]++) printf sep a[i]; sep=":" }
+    print ""
+  }' <<< $PATH)
 }
+
 

@@ -1,0 +1,13 @@
+
+source $HOME/dotfiles/profile.sh
+source $HOME/dotfiles/bashrc
+
+setup_aliases
+
+ensure_ssh_agent
+ssh_add_keys $HOME/.ssh/id_rsa
+
+export BASH_SILENCE_DEPRECATION_WARNING=1
+export CLICOLOR=true
+alias py=python3
+

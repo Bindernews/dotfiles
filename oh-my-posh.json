@@ -26,7 +26,7 @@
             "style": "folder"
           },
           "style": "powerline",
-          "template": " \uf74a {{ path .Path .Location }} ",
+          "template": " {{ path \"\uf74a\" .Location }} {{ .Path }} ",
           "type": "path"
         },
         {
